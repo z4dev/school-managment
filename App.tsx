@@ -1,7 +1,19 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Student, StudentKey } from './types';
+import { Student } from './types';
 import { INITIAL_CSV_DATA } from './constants';
 import StudentFormModal from './components/StudentFormModal';
+import StatsDashboard from './components/StatsDashboard';
+import AdvancedStats from './components/AdvancedStats';
+import ConfirmModal from './components/ConfirmModal';
+import Toast from './components/Toast';
+import Login from './components/Login';
+
+// FIX: Add a type for the toast state to prevent type inference issues.
+interface ToastState {
+  show: boolean;
+  message: string;
+  type: 'success' | 'error';
+}
 
 // --- Helper Functions ---
 const parseCSV = (csvData: string): Student[] => {
@@ -61,7 +73,6 @@ const parseCSV = (csvData: string): Student[] => {
           student.hasSiblings = value.replace(/н/g, 'ن');
           break;
         case 'ماهو أقرب معلم؟':
-          // This logic might still be fragile if commas appear elsewhere
           student.nearestLandmark = values.slice(index).join(', ').replace(/"/g, '');
           break;
       }
@@ -76,6 +87,11 @@ const formatDate = (date: Date) => {
 };
 
 const App: React.FC = () => {
+  // --- Auth State ---
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
+    return sessionStorage.getItem('isAuthenticated') === 'true';
+  });
+
   // --- State Management ---
   const [students, setStudents] = useState<Student[]>(() => {
     try {
@@ -95,6 +111,8 @@ const App: React.FC = () => {
   const [studentToEdit, setStudentToEdit] = useState<Student | null>(null);
   const [activeGrade, setActiveGrade] = useState<string>('الكل');
   const [currentPage, setCurrentPage] = useState(1);
+  const [toast, setToast] = useState<ToastState>({ show: false, message: '', type: 'success' });
+  const [confirmModal, setConfirmModal] = useState({ isOpen: false, studentId: null as string | null });
   const studentsPerPage = 50;
 
   // --- Effects ---
@@ -106,6 +124,17 @@ const App: React.FC = () => {
     }
   }, [students]);
 
+  // --- Auth Handlers ---
+  const handleLoginSuccess = () => {
+    sessionStorage.setItem('isAuthenticated', 'true');
+    setIsAuthenticated(true);
+  };
+
+  const handleLogout = () => {
+    sessionStorage.removeItem('isAuthenticated');
+    setIsAuthenticated(false);
+  };
+  
   // --- Memoized Calculations ---
   const grades = useMemo(() => {
     const gradeOrder = ['الاول', 'الثاني', 'الثالث', 'الرابع', 'الخامس', 'السادس', 'السابع', 'الثامن', 'التاسع'];
@@ -143,6 +172,10 @@ const App: React.FC = () => {
   const totalPages = Math.ceil(filteredStudents.length / studentsPerPage);
 
   // --- Handlers ---
+  const showToast = (message: string, type: 'success' | 'error' = 'success') => {
+    setToast({ show: true, message, type });
+  };
+
   const handleAddStudent = () => {
     setStudentToEdit(null);
     setIsModalOpen(true);
@@ -154,14 +187,21 @@ const App: React.FC = () => {
   };
 
   const handleDeleteStudent = (studentId: string) => {
-    if(window.confirm('هل أنت متأكد من حذف هذا الطالب؟')) {
-      setStudents(prev => prev.filter(s => s.id !== studentId));
+    setConfirmModal({ isOpen: true, studentId: studentId });
+  };
+  
+  const handleConfirmDelete = () => {
+    if (confirmModal.studentId) {
+        setStudents(prev => prev.filter(s => s.id !== confirmModal.studentId));
+        showToast('تم حذف الطالب بنجاح');
     }
+    setConfirmModal({ isOpen: false, studentId: null });
   };
 
   const handleModalSubmit = (studentData: Omit<Student, 'id' | 'attendance'> | Student) => {
     if ('id' in studentData) {
       setStudents(prev => prev.map(s => s.id === (studentData as Student).id ? { ...s, ...studentData } : s));
+      showToast('تم تحديث بيانات الطالب بنجاح');
     } else {
       const newStudent: Student = {
         ...studentData,
@@ -169,6 +209,7 @@ const App: React.FC = () => {
         attendance: {},
       };
       setStudents(prev => [newStudent, ...prev]);
+      showToast('تمت إضافة الطالب بنجاح');
     }
     setIsModalOpen(false);
   };
@@ -217,46 +258,61 @@ const App: React.FC = () => {
     }
   };
   
-  const inputStyle = "bg-slate-400/10 backdrop-blur-sm border border-slate-300/20 rounded-lg px-4 py-2.5 text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/80 focus:border-indigo-500 transition-all duration-300";
-
+  const inputStyle = "w-full bg-black/20 backdrop-blur-sm border border-[var(--border-color)] rounded-lg px-4 py-2.5 text-[var(--text-primary)] placeholder-[var(--text-secondary)] focus:outline-none focus:border-[var(--accent-cyan)] focus:ring-2 focus:ring-[var(--accent-cyan)]/50 transition-all duration-300";
 
   // --- Render ---
+  if (!isAuthenticated) {
+    return <Login onLoginSuccess={handleLoginSuccess} />;
+  }
+
   return (
-    <div className="bg-slate-950 text-slate-200 min-h-screen">
+    <div className="text-[var(--text-primary)] min-h-screen">
       <div className="container mx-auto p-4 md:p-8">
-        <header className="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
-          <h1 className="text-4xl font-bold tracking-tight bg-gradient-to-r from-indigo-500 to-purple-500 text-transparent bg-clip-text">
+        <header style={{ animationDelay: '100ms' }} className="animate-fade-in-down flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
+          <h1 className="text-5xl font-extrabold tracking-tight bg-gradient-to-r from-[var(--accent-cyan)] to-[var(--accent-magenta)] text-transparent bg-clip-text">
             سجل الطلاب
           </h1>
           <div className="flex items-center gap-3 flex-wrap justify-center">
             <button
               onClick={handleAddStudent}
-              className="px-4 py-2 rounded-lg text-white bg-indigo-600 hover:bg-indigo-700 transition-colors duration-300 font-semibold shadow-lg shadow-indigo-600/30 flex items-center gap-2"
+              className="px-5 py-2.5 rounded-lg text-white font-semibold bg-animated-gradient hover:opacity-90 transition-opacity duration-300 flex items-center gap-2"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clipRule="evenodd" /></svg>
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" /></svg>
               <span>إضافة طالب</span>
             </button>
             <button
               onClick={downloadCSV}
-              className="px-4 py-2 rounded-lg text-white bg-green-600 hover:bg-green-700 transition-colors duration-300 font-semibold shadow-lg shadow-green-600/30 flex items-center gap-2"
+              className="px-5 py-2.5 rounded-lg text-[var(--text-primary)] bg-black/20 backdrop-blur-sm border border-[var(--border-color)] hover:border-[var(--accent-cyan)] transition-colors duration-300 font-semibold flex items-center gap-2"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clipRule="evenodd" /></svg>
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M10 12a1 1 0 01-1-1V3a1 1 0 112 0v8a1 1 0 01-1 1z" /><path d="M3 10a1 1 0 011-1h2a1 1 0 110 2H4a1 1 0 01-1-1zM10 3a1 1 0 011 1v.01a1 1 0 11-2 0V4a1 1 0 011-1zM16 9a1 1 0 100 2h-2a1 1 0 100-2h2zM3 16a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" /></svg>
               <span>تحميل CSV</span>
+            </button>
+             <button
+              onClick={handleLogout}
+              className="group relative flex h-10 w-10 items-center justify-center rounded-full bg-black/20 border border-[var(--border-color)] text-[var(--accent-magenta)] transition-all duration-300 hover:border-[var(--accent-magenta)] hover:shadow-[var(--glow-magenta)]"
+            >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
+                 <span className="pointer-events-none absolute -top-9 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-md bg-[var(--bg-secondary)] px-2 py-1 text-xs text-[var(--text-primary)] opacity-0 transition-opacity group-hover:opacity-100">
+                    خروج
+                </span>
             </button>
           </div>
         </header>
 
-        <div className="mb-6 p-4 bg-slate-900 rounded-xl border border-slate-800">
+        <StatsDashboard students={filteredStudents} selectedDate={selectedDate} />
+        <AdvancedStats students={filteredStudents} selectedDate={selectedDate} />
+
+        <div style={{ animationDelay: '300ms' }} className="animate-fade-in-down mb-6 p-4 bg-[var(--bg-glass)] rounded-xl border border-[var(--border-color)] backdrop-blur-lg">
            <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
                 <input
                     type="search"
-                    placeholder="ابحث عن طالب..."
+                    placeholder="ابحث بالاسم, الهوية, الصف..."
                     value={globalSearch}
                     onChange={(e) => { setGlobalSearch(e.target.value); setCurrentPage(1); }}
                     className={`w-full md:w-1/3 ${inputStyle}`}
                 />
                  <div className="flex items-center gap-3">
-                    <label htmlFor="date-picker" className="font-semibold text-slate-300">تاريخ الحضور:</label>
+                    <label htmlFor="date-picker" className="font-semibold text-[var(--text-secondary)]">تاريخ الحضور:</label>
                     <input 
                         id="date-picker"
                         type="date"
@@ -268,89 +324,123 @@ const App: React.FC = () => {
             </div>
         </div>
         
-        <div className="mb-6 flex flex-wrap gap-x-2 border-b border-slate-800">
+        <div style={{ animationDelay: '400ms' }} className="animate-fade-in-down mb-6 flex flex-wrap gap-x-2 border-b border-[var(--border-color)]">
           {grades.map(grade => (
             <button
               key={grade}
               onClick={() => { setActiveGrade(grade); setCurrentPage(1); }}
-              className={`px-4 py-3 text-sm font-semibold transition-colors duration-300 border-b-2 ${activeGrade === grade ? 'border-indigo-500 text-indigo-400' : 'border-transparent text-slate-400 hover:text-slate-200'}`}
+              className={`relative px-4 py-3 text-sm font-semibold transition-colors duration-300 ${activeGrade === grade ? 'text-[var(--accent-cyan)]' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'}`}
             >
               {grade}
+              {activeGrade === grade && <div className="absolute bottom-0 left-0 w-full h-0.5 bg-[var(--accent-cyan)]"></div>}
             </button>
           ))}
         </div>
 
-        <div className="bg-slate-900 rounded-xl shadow-xl overflow-hidden border border-slate-800">
-          <div className="overflow-x-auto">
-            <table className="w-full text-right min-w-[1200px]">
-              <thead className="bg-slate-800/50">
-                <tr>
-                  <th className="p-4 font-semibold text-xs text-slate-400 uppercase tracking-wider w-[250px]">اسم الطالب</th>
-                  <th className="p-4 font-semibold text-xs text-slate-400 uppercase tracking-wider w-[150px]">رقم الهوية</th>
-                  <th className="p-4 font-semibold text-xs text-slate-400 uppercase tracking-wider w-[120px]">الصف</th>
-                  <th className="p-4 font-semibold text-xs text-slate-400 uppercase tracking-wider w-[120px]">الجنس</th>
-                  <th className="p-4 font-semibold text-xs text-slate-400 uppercase tracking-wider w-[120px]">له اخوة</th>
-                  <th className="p-4 font-semibold text-xs text-slate-400 uppercase tracking-wider w-[150px]">الحالة ({selectedDate.slice(5)})</th>
-                  <th className="p-4 font-semibold text-xs text-slate-400 uppercase tracking-wider w-[150px]">اجراءات</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-800">
+        <div style={{ animationDelay: '500ms' }} className="animate-fade-in-down bg-[var(--bg-glass)] rounded-xl border border-[var(--border-color)] backdrop-blur-lg">
+            {/* Desktop Header */}
+            <div className="hidden md:grid md:grid-cols-[2fr_1.5fr_1fr_1fr_1fr_1.5fr_1.5fr] gap-4 p-4 font-semibold text-xs text-[var(--text-secondary)] uppercase tracking-wider border-b border-[var(--border-color)]">
+                <span>اسم الطالب</span>
+                <span>رقم الهوية</span>
+                <span>الصف</span>
+                <span>الجنس</span>
+                <span>له اخوة</span>
+                <span>الحالة ({selectedDate.slice(5)})</span>
+                <span className="text-center">اجراءات</span>
+            </div>
+
+            {/* Student List */}
+            <div className="flex flex-col">
                 {paginatedStudents.length > 0 ? (
-                  paginatedStudents.map(student => (
-                    <tr key={student.id} className="hover:bg-slate-800/50 transition-colors">
-                      <td className="p-4 whitespace-nowrap text-slate-200">{student.fullName}</td>
-                      <td className="p-4 whitespace-nowrap text-slate-400">{student.studentId}</td>
-                      <td className="p-4 whitespace-nowrap text-slate-300">{student.grade}</td>
-                      <td className="p-4 whitespace-nowrap text-slate-300">{student.gender}</td>
-                      <td className="p-4 whitespace-nowrap text-slate-300">{student.hasSiblings}</td>
-                      <td className="p-4">
+                paginatedStudents.map(student => (
+                    <div key={student.id} className="border-b border-[var(--border-color)] p-4 md:grid md:grid-cols-[2fr_1.5fr_1fr_1fr_1fr_1.5fr_1.5fr] md:gap-4 md:p-4 md:items-center hover:bg-white/5 transition-all duration-300 last:border-b-0 group">
+                    
+                    {/* Full Name */}
+                    <div className="flex justify-between items-center md:block">
+                        <span className="text-xs font-bold text-[var(--text-secondary)] uppercase md:hidden">اسم الطالب</span>
+                        <span className="text-[var(--text-primary)] text-base font-semibold md:font-normal">{student.fullName}</span>
+                    </div>
+
+                    {/* Student ID */}
+                    <div className="flex justify-between items-center pt-3 md:pt-0">
+                        <span className="text-xs font-bold text-[var(--text-secondary)] uppercase md:hidden">رقم الهوية</span>
+                        <span className="text-[var(--text-secondary)]">{student.studentId}</span>
+                    </div>
+                    
+                    {/* Grade */}
+                    <div className="flex justify-between items-center pt-3 md:pt-0">
+                        <span className="text-xs font-bold text-[var(--text-secondary)] uppercase md:hidden">الصف</span>
+                        <span className="text-[var(--text-primary)]">{student.grade}</span>
+                    </div>
+
+                    {/* Gender */}
+                    <div className="flex justify-between items-center pt-3 md:pt-0">
+                        <span className="text-xs font-bold text-[var(--text-secondary)] uppercase md:hidden">الجنس</span>
+                        <span className="text-[var(--text-primary)]">{student.gender}</span>
+                    </div>
+
+                    {/* hasSiblings */}
+                    <div className="flex justify-between items-center pt-3 md:pt-0">
+                        <span className="text-xs font-bold text-[var(--text-secondary)] uppercase md:hidden">له اخوة</span>
+                        <span className="text-[var(--text-primary)]">{student.hasSiblings}</span>
+                    </div>
+
+                    {/* Attendance */}
+                    <div className="flex justify-between items-center pt-3 md:pt-0">
+                        <span className="text-xs font-bold text-[var(--text-secondary)] uppercase md:hidden">الحالة ({selectedDate.slice(5)})</span>
                         <select
-                          value={student.attendance[selectedDate] || ''}
-                          onChange={(e) => handleAttendanceChange(student.id, e.target.value)}
-                          className={`w-full rounded-lg border-none p-2 text-sm font-semibold transition-colors ${
-                              student.attendance[selectedDate] === 'حاضر' ? 'bg-green-500/20 text-green-300' :
-                              student.attendance[selectedDate] === 'غائب' ? 'bg-red-500/20 text-red-300' :
-                              'bg-slate-700/80 text-slate-300'
-                          }`}
+                            value={student.attendance[selectedDate] || ''}
+                            onChange={(e) => handleAttendanceChange(student.id, e.target.value)}
+                            className={`w-full md:w-auto rounded-lg border-none p-2 text-sm font-semibold transition-colors bg-black/30 text-[var(--text-secondary)]
+                                ${ student.attendance[selectedDate] === 'حاضر' ? '!text-green-300' : '' }
+                                ${ student.attendance[selectedDate] === 'غائب' ? '!text-red-400' : '' }
+                            `}
                         >
                             <option value="" disabled>اختر الحالة</option>
                             <option value="حاضر">حاضر</option>
                             <option value="غائب">غائب</option>
                         </select>
-                      </td>
-                      <td className="p-4">
-                        <div className="flex gap-4 justify-start">
-                          <button onClick={() => handleEditStudent(student)} className="text-indigo-400 hover:text-indigo-300 transition flex items-center gap-1.5">
-                             <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828z" /><path fillRule="evenodd" d="M2 6a2 2 0 012-2h4a1 1 0 010 2H4v10h10v-4a1 1 0 112 0v4a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" clipRule="evenodd" /></svg>
-                             <span>تعديل</span>
-                          </button>
-                          <button onClick={() => handleDeleteStudent(student.id)} className="text-red-500 hover:text-red-400 transition flex items-center gap-1.5">
-                             <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clipRule="evenodd" /></svg>
-                             <span>حذف</span>
-                          </button>
+                    </div>
+
+                    {/* Actions */}
+                    <div className="pt-4 mt-4 border-t border-[var(--border-color)] md:border-0 md:pt-0 md:mt-0">
+                        <div className="flex gap-2 justify-start md:justify-center">
+                            <button onClick={() => handleEditStudent(student)} className="group relative flex h-9 w-9 items-center justify-center rounded-full bg-black/20 border border-[var(--border-color)] text-[var(--accent-cyan)] transition-all duration-300 hover:border-[var(--accent-cyan)] hover:shadow-[var(--glow-cyan)]">
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828z" /><path fillRule="evenodd" d="M2 6a2 2 0 012-2h4a1 1 0 010 2H4v10h10v-4a1 1 0 112 0v4a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" clipRule="evenodd" /></svg>
+                                <span className="pointer-events-none absolute -top-8 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-md bg-[var(--bg-secondary)] px-2 py-1 text-xs text-[var(--text-primary)] opacity-0 transition-opacity group-hover:opacity-100">
+                                    تعديل
+                                </span>
+                            </button>
+                            <button onClick={() => handleDeleteStudent(student.id)} className="group relative flex h-9 w-9 items-center justify-center rounded-full bg-black/20 border border-[var(--border-color)] text-[var(--accent-magenta)] transition-all duration-300 hover:border-[var(--accent-magenta)] hover:shadow-[var(--glow-magenta)]">
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clipRule="evenodd" /></svg>
+                                <span className="pointer-events-none absolute -top-8 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-md bg-[var(--bg-secondary)] px-2 py-1 text-xs text-[var(--text-primary)] opacity-0 transition-opacity group-hover:opacity-100">
+                                    حذف
+                                </span>
+                            </button>
                         </div>
-                      </td>
-                    </tr>
-                  ))
+                    </div>
+
+                    </div>
+                ))
                 ) : (
-                  <tr>
-                    <td colSpan={7} className="text-center p-8 text-slate-500">
-                      لا يوجد طلاب لعرضهم. الرجاء تغيير فلاتر البحث أو إضافة طالب جديد.
-                    </td>
-                  </tr>
+                <div className="text-center p-12 text-[var(--text-secondary)]">
+                    <div className="flex flex-col items-center gap-4">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-16 w-16 text-[var(--accent-cyan)]/30" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 13h6m-3-3v6m-9 1V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z" /></svg>
+                        <p className="font-semibold text-lg text-[var(--text-primary)]">لا يوجد طلاب لعرضهم</p>
+                        <p className="text-sm">الرجاء تغيير فلاتر البحث أو إضافة طالب جديد.</p>
+                    </div>
+                </div>
                 )}
-              </tbody>
-            </table>
-          </div>
+            </div>
         </div>
 
         {totalPages > 1 && (
-            <div className="mt-6 flex justify-center items-center gap-3 text-slate-400">
-                <button onClick={() => changePage(currentPage - 1)} disabled={currentPage === 1} className="px-4 py-2 bg-slate-800 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-700 transition-colors">
+            <div className="mt-6 flex justify-center items-center gap-3 text-[var(--text-secondary)]">
+                <button onClick={() => changePage(currentPage - 1)} disabled={currentPage === 1} className="px-4 py-2 bg-[var(--bg-secondary)] rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-white/10 transition-colors">
                     السابق
                 </button>
-                <span className="font-semibold text-slate-300">صفحة {currentPage} من {totalPages}</span>
-                <button onClick={() => changePage(currentPage + 1)} disabled={currentPage === totalPages} className="px-4 py-2 bg-slate-800 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-700 transition-colors">
+                <span className="font-semibold text-[var(--text-primary)]">صفحة {currentPage} من {totalPages}</span>
+                <button onClick={() => changePage(currentPage + 1)} disabled={currentPage === totalPages} className="px-4 py-2 bg-[var(--bg-secondary)] rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-white/10 transition-colors">
                     التالي
                 </button>
             </div>
@@ -362,6 +452,16 @@ const App: React.FC = () => {
           onSubmit={handleModalSubmit}
           studentToEdit={studentToEdit}
         />
+
+        <ConfirmModal
+            isOpen={confirmModal.isOpen}
+            onClose={() => setConfirmModal({ isOpen: false, studentId: null })}
+            onConfirm={handleConfirmDelete}
+            title="تأكيد الحذف"
+            message="هل أنت متأكد من حذف هذا الطالب؟ لا يمكن التراجع عن هذا الإجراء."
+        />
+        {toast.show && <Toast message={toast.message} type={toast.type} onClose={() => setToast({ show: false, message: '', type: 'success' })} />}
+
       </div>
     </div>
   );

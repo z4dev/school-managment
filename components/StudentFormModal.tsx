@@ -21,6 +21,7 @@ const StudentFormModal: React.FC<StudentFormModalProps> = ({ isOpen, onClose, on
   };
 
   const [student, setStudent] = useState(studentToEdit || initialState);
+  const [isClosing, setIsClosing] = useState(false);
 
   useEffect(() => {
     if (studentToEdit) {
@@ -29,12 +30,19 @@ const StudentFormModal: React.FC<StudentFormModalProps> = ({ isOpen, onClose, on
     } else {
       setStudent(initialState);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [studentToEdit, isOpen]);
 
-  if (!isOpen) {
+  if (!isOpen && !isClosing) {
     return null;
   }
+
+  const handleClose = () => {
+    setIsClosing(true);
+    setTimeout(() => {
+      onClose();
+      setIsClosing(false);
+    }, 300);
+  };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -54,18 +62,18 @@ const StudentFormModal: React.FC<StudentFormModalProps> = ({ isOpen, onClose, on
     { name: 'nearestLandmark', label: 'أقرب معلم', type: 'text' },
   ];
   
-  const inputStyle = "w-full bg-slate-400/10 backdrop-blur-sm border border-slate-300/20 rounded-lg px-4 py-2.5 text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/80 focus:border-indigo-500 transition-all duration-300";
+  const inputStyle = "w-full bg-black/20 backdrop-blur-sm border border-[var(--border-color)] rounded-lg px-4 py-2.5 text-[var(--text-primary)] placeholder-[var(--text-secondary)] focus:outline-none focus:border-[var(--accent-cyan)] focus:ring-2 focus:ring-[var(--accent-cyan)]/50 transition-all duration-300";
 
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-75 flex justify-center items-center z-50 transition-opacity duration-300 ease-in-out backdrop-blur-sm">
-      <div className="bg-slate-900/80 backdrop-blur-lg border border-slate-800 rounded-xl shadow-2xl p-8 w-full max-w-2xl m-4 transform transition-all duration-300 ease-in-out scale-100">
-        <h2 className="text-2xl font-bold text-slate-100 mb-6 text-center">{studentToEdit ? 'تعديل سجل الطالب' : 'إضافة طالب جديد'}</h2>
+    <div className={`fixed inset-0 bg-black/50 flex justify-center items-center z-50 transition-opacity duration-300 backdrop-blur-md ${isOpen && !isClosing ? 'opacity-100' : 'opacity-0'}`}>
+      <div className={`bg-[var(--bg-glass)] border border-[var(--border-color)] rounded-xl shadow-2xl p-8 w-full max-w-2xl m-4 transform transition-all duration-300 ${isOpen && !isClosing ? 'scale-100 opacity-100' : 'scale-95 opacity-0'}`}>
+        <h2 className="text-2xl font-bold text-center mb-6 bg-gradient-to-r from-[var(--accent-cyan)] to-[var(--accent-magenta)] text-transparent bg-clip-text">{studentToEdit ? 'تعديل سجل الطالب' : 'إضافة طالب جديد'}</h2>
         <form onSubmit={handleSubmit}>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {fields.map(field => (
               <div key={field.name}>
-                <label htmlFor={field.name} className="block text-sm font-medium text-slate-400 mb-2">
+                <label htmlFor={field.name} className="block text-sm font-medium text-[var(--text-secondary)] mb-2">
                   {field.label}
                 </label>
                 <input
@@ -80,14 +88,14 @@ const StudentFormModal: React.FC<StudentFormModalProps> = ({ isOpen, onClose, on
               </div>
             ))}
              <div>
-              <label htmlFor="gender" className="block text-sm font-medium text-slate-400 mb-2">جنس الطالب</label>
+              <label htmlFor="gender" className="block text-sm font-medium text-[var(--text-secondary)] mb-2">جنس الطالب</label>
               <select id="gender" name="gender" value={student.gender} onChange={handleChange} className={inputStyle}>
                 <option value="ذكر">ذكر</option>
                 <option value="انثى">انثى</option>
               </select>
             </div>
             <div>
-              <label htmlFor="hasSiblings" className="block text-sm font-medium text-slate-400 mb-2">هل له اخوة في نفس المركز؟</label>
+              <label htmlFor="hasSiblings" className="block text-sm font-medium text-[var(--text-secondary)] mb-2">هل له اخوة في نفس المركز؟</label>
               <select id="hasSiblings" name="hasSiblings" value={student.hasSiblings} onChange={handleChange} className={inputStyle}>
                 <option value="نعم">نعم</option>
                 <option value="لا">لا</option>
@@ -95,10 +103,10 @@ const StudentFormModal: React.FC<StudentFormModalProps> = ({ isOpen, onClose, on
             </div>
           </div>
           <div className="mt-8 flex justify-end space-x-4 space-x-reverse">
-            <button type="button" onClick={onClose} className="px-6 py-2 rounded-lg text-slate-200 bg-slate-700 hover:bg-slate-600 transition-colors duration-300">
+            <button type="button" onClick={handleClose} className="px-6 py-2 rounded-lg text-[var(--text-primary)] bg-black/20 border border-[var(--border-color)] hover:border-[var(--text-secondary)] transition-colors duration-300">
               إلغاء
             </button>
-            <button type="submit" className="px-6 py-2 rounded-lg text-white bg-indigo-600 hover:bg-indigo-700 transition-colors duration-300 font-semibold shadow-lg shadow-indigo-600/30">
+            <button type="submit" className="px-6 py-2 rounded-lg text-white font-semibold bg-animated-gradient hover:opacity-90 transition-opacity duration-300">
               {studentToEdit ? 'حفظ التغييرات' : 'إضافة طالب'}
             </button>
           </div>
