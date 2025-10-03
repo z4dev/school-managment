@@ -1,0 +1,5 @@
+{
+  "name": "Student Records Manager",
+  "description": "A web application to manage student records with full CRUD functionality, advanced search, and CSV export capabilities. The interface is designed in Arabic with a modern, dark theme.",
+  "requestFramePermissions": []
+}
