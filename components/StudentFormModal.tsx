@@ -62,13 +62,13 @@ const StudentFormModal: React.FC<StudentFormModalProps> = ({ isOpen, onClose, on
     { name: 'nearestLandmark', label: 'أقرب معلم', type: 'text' },
   ];
   
-  const inputStyle = "w-full bg-black/20 backdrop-blur-sm border border-[var(--border-color)] rounded-lg px-4 py-2.5 text-[var(--text-primary)] placeholder-[var(--text-secondary)] focus:outline-none focus:border-[var(--accent-cyan)] focus:ring-2 focus:ring-[var(--accent-cyan)]/50 transition-all duration-300";
+  const inputStyle = "w-full bg-[var(--bg-secondary)] backdrop-blur-sm border border-[var(--border-color)] rounded-lg px-4 py-2.5 text-[var(--text-primary)] placeholder-[var(--text-secondary)] focus:outline-none focus:border-[var(--accent-primary)] focus:ring-2 focus:ring-[var(--accent-primary)]/50 transition-all duration-300";
 
 
   return (
     <div className={`fixed inset-0 bg-black/50 flex justify-center items-center z-50 transition-opacity duration-300 backdrop-blur-md ${isOpen && !isClosing ? 'opacity-100' : 'opacity-0'}`}>
       <div className={`bg-[var(--bg-glass)] border border-[var(--border-color)] rounded-xl shadow-2xl p-8 w-full max-w-2xl m-4 transform transition-all duration-300 ${isOpen && !isClosing ? 'scale-100 opacity-100' : 'scale-95 opacity-0'}`}>
-        <h2 className="text-2xl font-bold text-center mb-6 bg-gradient-to-r from-[var(--accent-cyan)] to-[var(--accent-magenta)] text-transparent bg-clip-text">{studentToEdit ? 'تعديل سجل الطالب' : 'إضافة طالب جديد'}</h2>
+        <h2 className="text-2xl font-bold text-center mb-6 bg-gradient-to-r from-[var(--accent-primary)] to-[var(--accent-secondary)] text-transparent bg-clip-text">{studentToEdit ? 'تعديل سجل الطالب' : 'إضافة طالب جديد'}</h2>
         <form onSubmit={handleSubmit}>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {fields.map(field => (

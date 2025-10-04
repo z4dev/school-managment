@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo } from 'react';
 import { Student } from '../types';
 
@@ -14,7 +15,7 @@ const getPercentage = (part: number, total: number) => {
 // Chart Components
 const GradeDistributionChart: React.FC<{ students: Student[] }> = ({ students }) => {
     const gradeData = useMemo(() => {
-        const gradeOrder = ['الاول', 'الثاني', 'الثالث', 'الرابع', 'الخامس', 'السادس', 'السابع', 'الثامن', 'التاسع'];
+        const gradeOrder = ['الاول', 'الثاني', 'الثالث', 'الرابع', 'الخامس', 'السادس', 'السابع', 'الثامن', 'التاسع', 'غير مصنف'];
         const counts = students.reduce((acc, student) => {
             acc[student.grade] = (acc[student.grade] || 0) + 1;
             return acc;
@@ -45,7 +46,7 @@ const GradeDistributionChart: React.FC<{ students: Student[] }> = ({ students })
                             <span className="w-16 text-[var(--text-secondary)] text-xs">{grade}</span>
                             <div className="flex-1 bg-black/30 rounded-full h-4">
                                 <div
-                                    className="h-4 rounded-full bg-gradient-to-r from-[var(--accent-cyan)] to-[var(--accent-magenta)]"
+                                    className="h-4 rounded-full bg-gradient-to-r from-[var(--accent-primary)] to-[var(--accent-secondary)]"
                                     style={{
                                         ['--target-width' as any]: `${widthPercentage}%`,
                                         animation: `grow-width 1s ease-out forwards`,
@@ -81,12 +82,12 @@ const GenderDonutChart: React.FC<{ students: Student[] }> = ({ students }) => {
             <h3 className="font-semibold text-[var(--text-primary)] mb-4">توزيع الطلاب حسب الجنس</h3>
             <div className="relative w-40 h-40">
                 <svg viewBox="0 0 100 100" className="w-full h-full transform -rotate-90">
-                    <circle cx="50" cy="50" r="45" stroke="var(--accent-magenta)" strokeWidth="10" fill="transparent" />
+                    <circle cx="50" cy="50" r="45" stroke="var(--accent-secondary)" strokeWidth="10" fill="transparent" />
                     <circle
                         cx="50"
                         cy="50"
                         r="45"
-                        stroke="var(--accent-cyan)"
+                        stroke="var(--accent-primary)"
                         strokeWidth="10"
                         fill="transparent"
                         strokeDasharray={circumference}
@@ -96,17 +97,17 @@ const GenderDonutChart: React.FC<{ students: Student[] }> = ({ students }) => {
                     />
                 </svg>
                 <div className="absolute inset-0 flex flex-col items-center justify-center">
-                    <span className="text-3xl font-bold text-white">{getPercentage(genderData.males, genderData.total)}</span>
+                    <span className="text-3xl font-bold text-[var(--text-primary)]">{getPercentage(genderData.males, genderData.total)}</span>
                     <span className="text-sm text-[var(--text-secondary)]">ذكور</span>
                 </div>
             </div>
             <div className="flex justify-center gap-6 mt-4 text-xs">
                 <div className="flex items-center gap-2">
-                    <div className="w-3 h-3 rounded-full bg-[var(--accent-cyan)]"></div>
+                    <div className="w-3 h-3 rounded-full bg-[var(--accent-primary)]"></div>
                     <span>ذكور: {genderData.males}</span>
                 </div>
                 <div className="flex items-center gap-2">
-                    <div className="w-3 h-3 rounded-full bg-[var(--accent-magenta)]"></div>
+                    <div className="w-3 h-3 rounded-full bg-[var(--accent-secondary)]"></div>
                     <span>إناث: {genderData.females}</span>
                 </div>
             </div>
@@ -120,7 +121,7 @@ const MetricCard: React.FC<{ title: string; value: string; icon: React.ReactNode
             <div className="w-10 h-10 flex items-center justify-center bg-black/20 rounded-lg text-[var(--text-secondary)] mb-3">
                 {icon}
             </div>
-            <div className="text-3xl font-bold text-white">{value}</div>
+            <div className="text-3xl font-bold text-[var(--text-primary)]">{value}</div>
         </div>
         <div className="text-sm text-[var(--text-secondary)] mt-1">{title}</div>
     </div>
@@ -133,10 +134,8 @@ const AdvancedStats: React.FC<AdvancedStatsProps> = ({ students, selectedDate })
     const advancedMetrics = useMemo(() => {
         const total = students.length;
         const markedAttendance = students.filter(s => s.attendance[selectedDate]).length;
-        const siblings = students.filter(s => s.hasSiblings === 'نعم').length;
         return {
             attendanceMarkedPercent: getPercentage(markedAttendance, total),
-            siblingsPercent: getPercentage(siblings, total),
         };
     }, [students, selectedDate]);
 
@@ -146,7 +145,7 @@ const AdvancedStats: React.FC<AdvancedStatsProps> = ({ students, selectedDate })
                 onClick={() => setIsOpen(!isOpen)}
                 className="w-full flex justify-between items-center p-4 bg-[var(--bg-glass)] rounded-xl border border-[var(--border-color)] backdrop-blur-lg mb-2"
             >
-                <h2 className="text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-slate-300 to-slate-400">
+                <h2 className="text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-slate-400 to-slate-500 dark:from-slate-300 dark:to-slate-400">
                     تحليلات متقدمة
                 </h2>
                 <svg
@@ -171,11 +170,6 @@ const AdvancedStats: React.FC<AdvancedStatsProps> = ({ students, selectedDate })
                                 title="حالة الحضور المسجلة"
                                 value={advancedMetrics.attendanceMarkedPercent}
                                 icon={<svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z" /><path fillRule="evenodd" d="M4 5a2 2 0 012-2h8a2 2 0 012 2v10a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h4a1 1 0 100-2H7zm0 4a1 1 0 100 2h4a1 1 0 100-2H7z" clipRule="evenodd" /></svg>}
-                            />
-                            <MetricCard
-                                title="الطلاب الذين لديهم إخوة"
-                                value={advancedMetrics.siblingsPercent}
-                                icon={<svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3zM6 8a2 2 0 11-4 0 2 2 0 014 0zM16 18v-3a5.972 5.972 0 00-.75-2.906A3.005 3.005 0 0119 15v3h-3zM4.75 12.094A5.973 5.973 0 004 15v3H1v-3a3 3 0 013.75-2.906z" /></svg>}
                             />
                         </div>
                     </div>

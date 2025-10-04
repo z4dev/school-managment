@@ -48,7 +48,7 @@ const ConfirmModal: React.FC<ConfirmModalProps> = ({ isOpen, onClose, onConfirm,
           <button
             type="button"
             onClick={handleConfirm}
-            className="px-6 py-2 rounded-lg text-white bg-[var(--accent-magenta)] hover:brightness-125 transition-all duration-300 font-semibold shadow-lg shadow-[var(--accent-magenta)]/30"
+            className="px-6 py-2 rounded-lg text-white bg-[var(--accent-danger)] hover:brightness-125 transition-all duration-300 font-semibold shadow-lg shadow-[var(--accent-danger)]/30"
           >
             تأكيد الحذف
           </button>
