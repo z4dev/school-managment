@@ -1,5 +1,6 @@
 import React, { useMemo, useState, useEffect, useRef } from 'react';
 import { Student } from '../types';
+import SiblingsModal from './SiblingsModal';
 
 interface StatsDashboardProps {
   students: Student[];
@@ -10,8 +11,9 @@ interface StatCardProps {
     icon: React.ReactNode;
     label: string;
     value: number;
-    color: 'primary' | 'secondary' | 'danger';
+    color: 'primary' | 'secondary' | 'danger' | 'info';
     secondaryValue?: string;
+    onClick?: () => void;
 }
 
 const AnimatedNumber: React.FC<{ value: number }> = ({ value }) => {
@@ -47,7 +49,7 @@ const AnimatedNumber: React.FC<{ value: number }> = ({ value }) => {
     return <span ref={ref}>{displayValue}</span>;
 };
 
-const StatCard: React.FC<StatCardProps> = ({ icon, label, value, color, secondaryValue }) => {
+const StatCard: React.FC<StatCardProps> = ({ icon, label, value, color, secondaryValue, onClick }) => {
     
     const colorMap = {
         primary: {
@@ -67,13 +69,19 @@ const StatCard: React.FC<StatCardProps> = ({ icon, label, value, color, secondar
             text: 'text-[var(--text-accent-danger)]',
             border: 'group-hover:border-[var(--accent-danger)]',
             glow: 'group-hover:shadow-[var(--glow-danger)]',
+        },
+        info: {
+            softBg: 'bg-[var(--soft-bg-info)]',
+            text: 'text-[var(--text-accent-info)]',
+            border: 'group-hover:border-[var(--accent-info)]',
+            glow: 'group-hover:shadow-[var(--glow-info)]',
         }
     };
 
     const styles = colorMap[color];
     
     return (
-        <div className={`relative overflow-hidden bg-[var(--bg-glass)] backdrop-blur-lg border border-[var(--border-color)] rounded-xl p-5 transform hover:-translate-y-1.5 transition-transform duration-300 group`}>
+        <div onClick={onClick} className={`relative overflow-hidden bg-[var(--bg-glass)] backdrop-blur-lg border border-[var(--border-color)] rounded-xl p-5 transform hover:-translate-y-1.5 transition-transform duration-300 group ${onClick ? 'cursor-pointer' : ''}`}>
             <div className={`absolute -top-1/2 -left-1/2 w-full h-full bg-gradient-to-br from-transparent via-current/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 ${styles.text}`}></div>
             <div className={`absolute inset-0 rounded-xl border-2 border-transparent ${styles.border} transition-all duration-300`}></div>
             <div className="flex items-center gap-5 relative z-10">
@@ -93,15 +101,19 @@ const StatCard: React.FC<StatCardProps> = ({ icon, label, value, color, secondar
 };
 
 const StatsDashboard: React.FC<StatsDashboardProps> = ({ students, selectedDate }) => {
+  const [isSiblingsModalOpen, setIsSiblingsModalOpen] = useState(false);
+
   const stats = useMemo(() => {
     const totalStudents = students.length;
     const presentStudents = students.filter(s => s.attendance[selectedDate] === 'حاضر').length;
     const absentStudents = students.filter(s => s.attendance[selectedDate] === 'غائب').length;
-    
+    const studentsWithSiblings = students.filter(s => s.hasSiblings.trim() === 'نعم').length;
+
     return {
       totalStudents,
       presentStudents,
       absentStudents,
+      studentsWithSiblings,
     };
   }, [students, selectedDate]);
 
@@ -111,28 +123,42 @@ const StatsDashboard: React.FC<StatsDashboardProps> = ({ students, selectedDate 
   }
 
   return (
-    <div style={{ animationDelay: '200ms' }} className="animate-fade-in-down grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-      <StatCard
-        label="إجمالي الطلاب"
-        value={stats.totalStudents}
-        color="primary"
-        icon={<svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" /></svg>}
+    <>
+      <div style={{ animationDelay: '200ms' }} className="animate-fade-in-down grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <StatCard
+          label="إجمالي الطلاب"
+          value={stats.totalStudents}
+          color="primary"
+          icon={<svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" /></svg>}
+        />
+        <StatCard
+          label="الطلاب الحاضرون"
+          value={stats.presentStudents}
+          secondaryValue={getPercentage(stats.presentStudents, stats.totalStudents)}
+          color="secondary"
+          icon={<svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>}
+        />
+        <StatCard
+          label="الطلاب الغائبون"
+          value={stats.absentStudents}
+          secondaryValue={getPercentage(stats.absentStudents, stats.totalStudents)}
+          color="danger"
+          icon={<svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>}
+        />
+        <StatCard
+          label="طلاب لديهم إخوة"
+          value={stats.studentsWithSiblings}
+          color="info"
+          onClick={() => setIsSiblingsModalOpen(true)}
+          icon={<svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" viewBox="0 0 20 20" fill="currentColor"><path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3zM6 8a2 2 0 11-4 0 2 2 0 014 0zM16 18v-3a5.972 5.972 0 00-.75-2.906A3.005 3.005 0 0119 15v3h-3zM4.75 12.094A5.973 5.973 0 004 15v3H1v-3a3 3 0 013.75-2.906z" /></svg>}
+        />
+      </div>
+      <SiblingsModal 
+        isOpen={isSiblingsModalOpen}
+        onClose={() => setIsSiblingsModalOpen(false)}
+        students={students}
       />
-      <StatCard
-        label="الطلاب الحاضرون"
-        value={stats.presentStudents}
-        secondaryValue={getPercentage(stats.presentStudents, stats.totalStudents)}
-        color="secondary"
-        icon={<svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>}
-      />
-      <StatCard
-        label="الطلاب الغائبون"
-        value={stats.absentStudents}
-        secondaryValue={getPercentage(stats.absentStudents, stats.totalStudents)}
-        color="danger"
-        icon={<svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>}
-      />
-    </div>
+    </>
   );
 };
 

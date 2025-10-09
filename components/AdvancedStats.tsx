@@ -1,4 +1,6 @@
 
+
+
 import React, { useState, useMemo } from 'react';
 import { Student } from '../types';
 
@@ -16,10 +18,12 @@ const getPercentage = (part: number, total: number) => {
 const GradeDistributionChart: React.FC<{ students: Student[] }> = ({ students }) => {
     const gradeData = useMemo(() => {
         const gradeOrder = ['الاول', 'الثاني', 'الثالث', 'الرابع', 'الخامس', 'السادس', 'السابع', 'الثامن', 'التاسع', 'غير مصنف'];
-        const counts = students.reduce((acc, student) => {
+        // FIX: Use generic on `reduce` to ensure `counts` is correctly typed as Record<string, number>,
+        // which resolves the type error for `Math.max` when spreading `Object.values(counts)`.
+        const counts = students.reduce((acc: Record<string, number>, student) => {
             acc[student.grade] = (acc[student.grade] || 0) + 1;
             return acc;
-        }, {} as Record<string, number>);
+        }, {});
 
         const sorted = Object.entries(counts).sort(([a], [b]) => {
             const indexA = gradeOrder.indexOf(a);
