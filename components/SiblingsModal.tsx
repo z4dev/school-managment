@@ -126,7 +126,7 @@ const SiblingsModal: React.FC<SiblingsModalProps> = ({ isOpen, onClose, students
           {filteredSiblingGroups.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {filteredSiblingGroups.map((group, index) => (
-                <div key={index} className="bg-[rgba(10,15,26,0.5)] border border-[var(--border-color)] rounded-lg p-4">
+                <div key={index} className="bg-[var(--card-bg)] border border-[var(--border-color)] rounded-lg p-4">
                   <p className="text-sm text-[var(--text-secondary)] mb-2">
                     {language === 'ar' ? 'عائلة برقم الاتصال:' : 'Family Contact Number:'} <span className="font-semibold text-[var(--text-primary)]">{group[0].mobile}</span>
                   </p>

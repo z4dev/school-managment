@@ -42,7 +42,7 @@ const Login: React.FC<LoginProps> = ({ onLoginSuccess, language, setLanguage }) 
     }
   };
   
-  const inputStyle = `w-full bg-black/30 backdrop-blur-sm border border-[var(--border-color)] rounded-lg pl-4 ${language === 'ar' ? 'pr-10' : 'pl-10 pr-4'} py-3 text-[var(--text-primary)] placeholder-[var(--text-secondary)] focus:outline-none focus:border-[var(--accent-primary)] focus:ring-2 focus:ring-[var(--accent-primary)]/50 transition-all duration-300`;
+  const inputStyle = `w-full bg-[var(--input-bg)] backdrop-blur-sm border border-[var(--border-color)] rounded-lg pl-4 ${language === 'ar' ? 'pr-10' : 'pl-10 pr-4'} py-3 text-[var(--text-primary)] placeholder-[var(--text-secondary)] focus:outline-none focus:border-[var(--accent-primary)] focus:ring-2 focus:ring-[var(--accent-primary)]/50 transition-all duration-300`;
 
   return (
     <div className="min-h-screen w-full flex items-center justify-center p-4 text-[var(--text-primary)] login-grid-background overflow-hidden" dir={language === 'ar' ? 'rtl' : 'ltr'}>

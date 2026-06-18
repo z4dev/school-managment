@@ -476,7 +476,7 @@ const App: React.FC = () => {
           </div>
         ) : (
           <div className="space-y-6">
-            <div className="bg-black/20 p-4 rounded-lg border border-[var(--border-color)]">
+            <div className="bg-[var(--card-bg)] p-4 rounded-lg border border-[var(--border-color)]">
               <span className="text-xs font-bold text-[var(--accent-secondary)] tracking-wide uppercase">
                 {language === 'ar' ? 'المادة النشطة' : 'Active Course'}
               </span>
@@ -501,8 +501,8 @@ const App: React.FC = () => {
                   );
 
                   return (
-                    <div key={chapter.id} className="border border-[var(--border-color)] rounded-lg p-5 bg-black/30 hover:border-[var(--accent-primary)]/40 transition-colors">
-                      <div className="flex justify-between items-start flex-wrap gap-2 border-b border-white/5 pb-3 mb-3">
+                    <div key={chapter.id} className="border border-[var(--border-color)] rounded-lg p-5 bg-[var(--card-bg)] hover:border-[var(--accent-primary)]/40 transition-colors">
+                      <div className="flex justify-between items-start flex-wrap gap-2 border-b border-[var(--border-subtle)] pb-3 mb-3">
                         <div>
                           <h4 className="font-extrabold text-sm text-[var(--accent-primary)]">
                             {language === 'ar' ? chapter.titleAr : chapter.titleEn}
@@ -511,7 +511,7 @@ const App: React.FC = () => {
                             {language === 'ar' ? chapter.descriptionAr : chapter.descriptionEn}
                           </p>
                         </div>
-                        <span className="text-[10px] bg-white/10 px-2 py-0.5 rounded text-gray-400 font-mono">
+                        <span className="text-[10px] bg-[var(--badge-bg)] px-2 py-0.5 rounded text-gray-400 font-mono">
                           {chapter.id}
                         </span>
                       </div>
@@ -539,7 +539,7 @@ const App: React.FC = () => {
                         </div>
                       </div>
 
-                      <div className="mt-4 pt-3 border-t border-white/5 flex flex-wrap justify-between items-center gap-2 text-[10px]">
+                      <div className="mt-4 pt-3 border-t border-[var(--border-subtle)] flex flex-wrap justify-between items-center gap-2 text-[10px]">
                         <div className="text-[var(--text-secondary)] font-semibold">
                           📌 {language === 'ar' ? 'المعيار الموائم:' : 'Aligned Standard:'}{' '}
                           <span className="text-[var(--text-primary)]">{language === 'ar' ? chapter.standardAr : chapter.standardEn}</span>
@@ -1437,7 +1437,7 @@ const App: React.FC = () => {
           <div className="flex items-center gap-3 flex-wrap">
             {/* Multiple roles Switcher */}
             {userRoles.length > 1 && (
-              <div className="flex items-center gap-2 bg-black/20 dark:bg-white/5 hover:bg-black/30 dark:hover:bg-white/10 px-3 py-1.5 rounded-xl border border-[var(--border-color)] transition-all duration-300 shadow-sm">
+              <div className="flex items-center gap-2 bg-[var(--input-bg)] hover:bg-[var(--hover-bg)] px-3 py-1.5 rounded-xl border border-[var(--border-color)] transition-all duration-300 shadow-sm">
                 <ShieldCheck className="h-4 w-4 text-[var(--accent-primary)]" />
                 <span className="text-xs text-[var(--text-secondary)] font-semibold hidden sm:inline">{t('activeRole')}</span>
                 <select 
@@ -1457,7 +1457,7 @@ const App: React.FC = () => {
             {/* Language Switcher */}
             <button 
               onClick={() => setLanguage(l => l === 'ar' ? 'en' : 'ar')}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-sm bg-black/20 dark:bg-white/5 border border-[var(--border-color)] hover:border-[var(--accent-primary)] hover:bg-black/30 dark:hover:bg-white/10 transition-all font-bold text-[var(--text-primary)] shadow-sm"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-sm bg-[var(--input-bg)] hover:bg-[var(--hover-bg)] border border-[var(--border-color)] hover:border-[var(--accent-primary)] transition-all font-bold text-[var(--text-primary)] shadow-sm"
             >
               <Globe className="h-4 w-4 text-[var(--accent-primary)]" />
               <span>{t('langToggle')}</span>
@@ -1466,7 +1466,7 @@ const App: React.FC = () => {
             {/* Dark/Light Switcher */}
             <button 
               onClick={() => setTheme(t => t === 'dark' ? 'light' : 'dark')}
-              className="group flex h-9 w-9 items-center justify-center rounded-xl bg-black/20 dark:bg-white/5 border border-[var(--border-color)] hover:border-[var(--accent-primary)] hover:bg-black/30 dark:hover:bg-white/10 transition-all shadow-sm"
+              className="group flex h-9 w-9 items-center justify-center rounded-xl bg-[var(--input-bg)] hover:bg-[var(--hover-bg)] border border-[var(--border-color)] hover:border-[var(--accent-primary)] transition-all shadow-sm"
               aria-label="Toggle theme"
             >
               {theme === 'dark' ? (
@@ -1491,14 +1491,14 @@ const App: React.FC = () => {
       <div className="container mx-auto px-4 py-6 md:py-8">
         
         {/* Module selection tabs (Respecting activeRole permissions) */}
-        <div className="flex flex-wrap gap-2.5 mb-8 bg-black/10 dark:bg-white/5 border border-[var(--border-color)] p-2 rounded-2xl backdrop-blur-md shadow-inner">
+        <div className="flex flex-wrap gap-2.5 mb-8 bg-[var(--card-bg)] border border-[var(--border-color)] p-2 rounded-2xl backdrop-blur-md shadow-inner">
           
           <button 
             onClick={() => setActiveTab('dashboard')} 
             className={`flex items-center gap-2 px-4 py-2.5 text-sm font-bold rounded-xl transition-all duration-300 transform hover:-translate-y-0.5 active:translate-y-0 ${
               activeTab === 'dashboard' 
                 ? 'bg-gradient-to-r from-[var(--accent-primary)] to-[#0ea5e9] text-white shadow-[0_4px_12px_rgba(14,165,233,0.3)] scale-[1.02]' 
-                : 'text-[var(--text-secondary)] bg-transparent hover:bg-black/10 dark:hover:bg-white/5 hover:text-[var(--text-primary)]'
+                : 'text-[var(--text-secondary)] bg-transparent hover:bg-[var(--hover-bg)] hover:text-[var(--text-primary)]'
             }`}
           >
             <BarChart3 className={`h-4.5 w-4.5 ${activeTab === 'dashboard' ? 'text-white' : 'text-[var(--accent-primary)]'}`} />
@@ -1511,7 +1511,7 @@ const App: React.FC = () => {
               className={`flex items-center gap-2 px-4 py-2.5 text-sm font-bold rounded-xl transition-all duration-300 transform hover:-translate-y-0.5 active:translate-y-0 ${
                 activeTab === 'admin' 
                   ? 'bg-gradient-to-r from-[var(--accent-primary)] to-[#0ea5e9] text-white shadow-[0_4px_12px_rgba(14,165,233,0.3)] scale-[1.02]' 
-                  : 'text-[var(--text-secondary)] bg-transparent hover:bg-black/10 dark:hover:bg-white/5 hover:text-[var(--text-primary)]'
+                  : 'text-[var(--text-secondary)] bg-transparent hover:bg-[var(--hover-bg)] hover:text-[var(--text-primary)]'
               }`}
             >
               <Users className={`h-4.5 w-4.5 ${activeTab === 'admin' ? 'text-white' : 'text-[var(--accent-primary)]'}`} />
@@ -1525,7 +1525,7 @@ const App: React.FC = () => {
               className={`flex items-center gap-2 px-4 py-2.5 text-sm font-bold rounded-xl transition-all duration-300 transform hover:-translate-y-0.5 active:translate-y-0 ${
                 activeTab === 'social' 
                   ? 'bg-gradient-to-r from-[var(--accent-primary)] to-[#0ea5e9] text-white shadow-[0_4px_12px_rgba(14,165,233,0.3)] scale-[1.02]' 
-                  : 'text-[var(--text-secondary)] bg-transparent hover:bg-black/10 dark:hover:bg-white/5 hover:text-[var(--text-primary)]'
+                  : 'text-[var(--text-secondary)] bg-transparent hover:bg-[var(--hover-bg)] hover:text-[var(--text-primary)]'
               }`}
             >
               <HeartHandshake className={`h-4.5 w-4.5 ${activeTab === 'social' ? 'text-white' : 'text-[var(--accent-primary)]'}`} />
@@ -1544,7 +1544,7 @@ const App: React.FC = () => {
               className={`flex items-center gap-2 px-4 py-2.5 text-sm font-bold rounded-xl transition-all duration-300 transform hover:-translate-y-0.5 active:translate-y-0 ${
                 activeTab === 'teacher' 
                   ? 'bg-gradient-to-r from-[var(--accent-primary)] to-[#0ea5e9] text-white shadow-[0_4px_12px_rgba(14,165,233,0.3)] scale-[1.02]' 
-                  : 'text-[var(--text-secondary)] bg-transparent hover:bg-black/10 dark:hover:bg-white/5 hover:text-[var(--text-primary)]'
+                  : 'text-[var(--text-secondary)] bg-transparent hover:bg-[var(--hover-bg)] hover:text-[var(--text-primary)]'
               }`}
             >
               <BookOpenCheck className={`h-4.5 w-4.5 ${activeTab === 'teacher' ? 'text-white' : 'text-[var(--accent-primary)]'}`} />
@@ -1558,7 +1558,7 @@ const App: React.FC = () => {
               className={`flex items-center gap-2 px-4 py-2.5 text-sm font-bold rounded-xl transition-all duration-300 transform hover:-translate-y-0.5 active:translate-y-0 ${
                 activeTab === 'parent' 
                   ? 'bg-gradient-to-r from-[var(--accent-primary)] to-[#0ea5e9] text-white shadow-[0_4px_12px_rgba(14,165,233,0.3)] scale-[1.02]' 
-                  : 'text-[var(--text-secondary)] bg-transparent hover:bg-black/10 dark:hover:bg-white/5 hover:text-[var(--text-primary)]'
+                  : 'text-[var(--text-secondary)] bg-transparent hover:bg-[var(--hover-bg)] hover:text-[var(--text-primary)]'
               }`}
             >
               <Baby className={`h-4.5 w-4.5 ${activeTab === 'parent' ? 'text-white' : 'text-[var(--accent-primary)]'}`} />
@@ -1572,7 +1572,7 @@ const App: React.FC = () => {
               className={`flex items-center gap-2 px-4 py-2.5 text-sm font-bold rounded-xl transition-all duration-300 transform hover:-translate-y-0.5 active:translate-y-0 ${
                 activeTab === 'finance' 
                   ? 'bg-gradient-to-r from-[var(--accent-primary)] to-[#0ea5e9] text-white shadow-[0_4px_12px_rgba(14,165,233,0.3)] scale-[1.02]' 
-                  : 'text-[var(--text-secondary)] bg-transparent hover:bg-black/10 dark:hover:bg-white/5 hover:text-[var(--text-primary)]'
+                  : 'text-[var(--text-secondary)] bg-transparent hover:bg-[var(--hover-bg)] hover:text-[var(--text-primary)]'
               }`}
             >
               <DollarSign className={`h-4.5 w-4.5 ${activeTab === 'finance' ? 'text-white' : 'text-[var(--accent-primary)]'}`} />
@@ -1586,7 +1586,7 @@ const App: React.FC = () => {
               className={`flex items-center gap-2 px-4 py-2.5 text-sm font-bold rounded-xl transition-all duration-300 transform hover:-translate-y-0.5 active:translate-y-0 ${
                 activeTab === 'compliance' 
                   ? 'bg-gradient-to-r from-[var(--accent-primary)] to-[#0ea5e9] text-white shadow-[0_4px_12px_rgba(14,165,233,0.3)] scale-[1.02]' 
-                  : 'text-[var(--text-secondary)] bg-transparent hover:bg-black/10 dark:hover:bg-white/5 hover:text-[var(--text-primary)]'
+                  : 'text-[var(--text-secondary)] bg-transparent hover:bg-[var(--hover-bg)] hover:text-[var(--text-primary)]'
               }`}
             >
               <ShieldCheck className={`h-4.5 w-4.5 ${activeTab === 'compliance' ? 'text-white' : 'text-[var(--accent-primary)]'}`} />
@@ -1604,7 +1604,7 @@ const App: React.FC = () => {
             className={`flex items-center gap-2 px-4 py-2.5 text-sm font-bold rounded-xl transition-all duration-300 transform hover:-translate-y-0.5 active:translate-y-0 ${
               activeTab === 'reports' 
                 ? 'bg-gradient-to-r from-[var(--accent-primary)] to-[#0ea5e9] text-white shadow-[0_4px_12px_rgba(14,165,233,0.3)] scale-[1.02]' 
-                : 'text-[var(--text-secondary)] bg-transparent hover:bg-black/10 dark:hover:bg-white/5 hover:text-[var(--text-primary)]'
+                : 'text-[var(--text-secondary)] bg-transparent hover:bg-[var(--hover-bg)] hover:text-[var(--text-primary)]'
             }`}
           >
             <FileText className={`h-4.5 w-4.5 ${activeTab === 'reports' ? 'text-white' : 'text-[var(--accent-primary)]'}`} />
@@ -1617,7 +1617,7 @@ const App: React.FC = () => {
               className={`flex items-center gap-2 px-4 py-2.5 text-sm font-bold rounded-xl transition-all duration-300 transform hover:-translate-y-0.5 active:translate-y-0 ${
                 activeTab === 'sysadmin' 
                   ? 'bg-gradient-to-r from-[var(--accent-primary)] to-[#0ea5e9] text-white shadow-[0_4px_12px_rgba(14,165,233,0.3)] scale-[1.02]' 
-                  : 'text-[var(--text-secondary)] bg-transparent hover:bg-black/10 dark:hover:bg-white/5 hover:text-[var(--text-primary)]'
+                  : 'text-[var(--text-secondary)] bg-transparent hover:bg-[var(--hover-bg)] hover:text-[var(--text-primary)]'
               }`}
             >
               <Settings2 className={`h-4.5 w-4.5 ${activeTab === 'sysadmin' ? 'text-white' : 'text-[var(--accent-primary)]'}`} />
