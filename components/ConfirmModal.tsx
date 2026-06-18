@@ -6,9 +6,11 @@ interface ConfirmModalProps {
   onConfirm: () => void;
   title: string;
   message: string;
+  cancelLabel?: string;
+  confirmLabel?: string;
 }
 
-const ConfirmModal: React.FC<ConfirmModalProps> = ({ isOpen, onClose, onConfirm, title, message }) => {
+const ConfirmModal: React.FC<ConfirmModalProps> = ({ isOpen, onClose, onConfirm, title, message, cancelLabel, confirmLabel }) => {
   const [isClosing, setIsClosing] = useState(false);
 
   useEffect(() => {
@@ -43,14 +45,14 @@ const ConfirmModal: React.FC<ConfirmModalProps> = ({ isOpen, onClose, onConfirm,
             onClick={handleClose}
             className="px-6 py-2 rounded-lg text-[var(--text-primary)] bg-black/20 border border-[var(--border-color)] hover:border-[var(--text-secondary)] transition-colors duration-300"
           >
-            إلغاء
+            {cancelLabel || 'إلغاء'}
           </button>
           <button
             type="button"
             onClick={handleConfirm}
             className="px-6 py-2 rounded-lg text-white bg-[var(--accent-danger)] hover:brightness-125 transition-all duration-300 font-semibold shadow-lg shadow-[var(--accent-danger)]/30"
           >
-            تأكيد الحذف
+            {confirmLabel || 'تأكيد الحذف'}
           </button>
         </div>
       </div>
