@@ -45,8 +45,7 @@ ENV PORT=5050
 ENV DATABASE_PATH=/usr/src/app/backend/data/school.db
 ENV CONSTANTS_PATH=/usr/src/app/frontend/constants.ts
 
-# SQLite persistence volume
-VOLUME /usr/src/app/backend/data
+# SQLite persistence volume (handled via Railway Volumes / docker-compose mounts)
 
 EXPOSE 5050
 
