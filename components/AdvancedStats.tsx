@@ -1,12 +1,11 @@
-
-
-
 import React, { useState, useMemo } from 'react';
 import { Student } from '../types';
+import { ChevronDown, ClipboardList } from 'lucide-react';
 
 interface AdvancedStatsProps {
     students: Student[];
     selectedDate: string;
+    language: 'ar' | 'en';
 }
 
 const getPercentage = (part: number, total: number) => {
@@ -15,15 +14,32 @@ const getPercentage = (part: number, total: number) => {
 }
 
 // Chart Components
-const GradeDistributionChart: React.FC<{ students: Student[] }> = ({ students }) => {
+const GradeDistributionChart: React.FC<{ students: Student[]; language: 'ar' | 'en' }> = ({ students, language }) => {
+    const formatGradeLocal = (grade: string) => {
+        const map: Record<string, string> = {
+          'الاول': language === 'ar' ? 'الصف الأول' : 'Grade 1',
+          'الثاني': language === 'ar' ? 'الصف الثاني' : 'Grade 2',
+          'الثالث': language === 'ar' ? 'الصف الثالث' : 'Grade 3',
+          'الرابع': language === 'ar' ? 'الصف الرابع' : 'Grade 4',
+          'الخامس': language === 'ar' ? 'الصف الخامس' : 'Grade 5',
+          'السادس': language === 'ar' ? 'الصف السادس' : 'Grade 6',
+          'السابع': language === 'ar' ? 'الصف السابع' : 'Grade 7',
+          'الثامن': language === 'ar' ? 'الصف الثامن' : 'Grade 8',
+          'التاسع': language === 'ar' ? 'الصف التاسع' : 'Grade 9',
+          'العاشر': language === 'ar' ? 'الصف العاشر' : 'Grade 10',
+          'الحادي عشر': language === 'ar' ? 'الصف الحادي عشر' : 'Grade 11',
+          'الثاني عشر': language === 'ar' ? 'الصف الثاني عشر' : 'Grade 12',
+          'غير مصنف': language === 'ar' ? 'غير مصنف' : 'Unclassified',
+        };
+        return map[grade] || grade;
+    };
+
     const gradeData = useMemo(() => {
-        const gradeOrder = ['الاول', 'الثاني', 'الثالث', 'الرابع', 'الخامس', 'السادس', 'السابع', 'الثامن', 'التاسع', 'غير مصنف'];
-        // FIX: Use generic on `reduce` to ensure `counts` is correctly typed as Record<string, number>,
-        // which resolves the type error for `Math.max` when spreading `Object.values(counts)`.
+        const gradeOrder = ['الاول', 'الثاني', 'الثالث', 'الرابع', 'الخامس', 'السادس', 'السابع', 'الثامن', 'التاسع', 'العاشر', 'الحادي عشر', 'الثاني عشر'];
         const counts = students.reduce((acc: Record<string, number>, student) => {
             acc[student.grade] = (acc[student.grade] || 0) + 1;
             return acc;
-        }, {});
+        }, {} as Record<string, number>);
 
         const sorted = Object.entries(counts).sort(([a], [b]) => {
             const indexA = gradeOrder.indexOf(a);
@@ -33,7 +49,7 @@ const GradeDistributionChart: React.FC<{ students: Student[] }> = ({ students })
             return indexA - indexB;
         });
         
-        const max = Math.max(...Object.values(counts), 0);
+        const max = Math.max(...(Object.values(counts) as number[]), 0);
         return { sorted, max };
     }, [students]);
 
@@ -41,13 +57,15 @@ const GradeDistributionChart: React.FC<{ students: Student[] }> = ({ students })
 
     return (
         <div className="bg-[rgba(10,15,26,0.5)] p-5 rounded-lg border border-[var(--border-color)]">
-            <h3 className="font-semibold text-[var(--text-primary)] mb-4">توزيع الطلاب حسب الصف</h3>
+            <h3 className="font-semibold text-[var(--text-primary)] mb-4">
+              {language === 'ar' ? 'توزيع الطلاب حسب الصف' : 'Student Distribution by Grade'}
+            </h3>
             <div className="space-y-3">
                 {gradeData.sorted.map(([grade, count], index) => {
                     const widthPercentage = gradeData.max > 0 ? (count / gradeData.max) * 100 : 0;
                     return (
                         <div key={grade} className="flex items-center gap-3 text-sm">
-                            <span className="w-16 text-[var(--text-secondary)] text-xs">{grade}</span>
+                            <span className="w-24 text-[var(--text-secondary)] text-xs truncate">{formatGradeLocal(grade)}</span>
                             <div className="flex-1 bg-black/30 rounded-full h-4">
                                 <div
                                     className="h-4 rounded-full bg-gradient-to-r from-[var(--accent-primary)] to-[var(--accent-secondary)]"
@@ -67,7 +85,7 @@ const GradeDistributionChart: React.FC<{ students: Student[] }> = ({ students })
     );
 };
 
-const GenderDonutChart: React.FC<{ students: Student[] }> = ({ students }) => {
+const GenderDonutChart: React.FC<{ students: Student[]; language: 'ar' | 'en' }> = ({ students, language }) => {
     const genderData = useMemo(() => {
         const males = students.filter(s => s.gender === 'ذكر').length;
         const females = students.filter(s => s.gender === 'انثى').length;
@@ -83,7 +101,9 @@ const GenderDonutChart: React.FC<{ students: Student[] }> = ({ students }) => {
 
     return (
         <div className="bg-[rgba(10,15,26,0.5)] p-5 rounded-lg border border-[var(--border-color)] flex flex-col items-center">
-            <h3 className="font-semibold text-[var(--text-primary)] mb-4">توزيع الطلاب حسب الجنس</h3>
+            <h3 className="font-semibold text-[var(--text-primary)] mb-4">
+              {language === 'ar' ? 'توزيع الطلاب حسب الجنس' : 'Student Distribution by Gender'}
+            </h3>
             <div className="relative w-40 h-40">
                 <svg viewBox="0 0 100 100" className="w-full h-full transform -rotate-90">
                     <circle cx="50" cy="50" r="45" stroke="var(--accent-secondary)" strokeWidth="10" fill="transparent" />
@@ -102,17 +122,19 @@ const GenderDonutChart: React.FC<{ students: Student[] }> = ({ students }) => {
                 </svg>
                 <div className="absolute inset-0 flex flex-col items-center justify-center">
                     <span className="text-3xl font-bold text-[var(--text-primary)]">{getPercentage(genderData.males, genderData.total)}</span>
-                    <span className="text-sm text-[var(--text-secondary)]">ذكور</span>
+                    <span className="text-sm text-[var(--text-secondary)]">
+                      {language === 'ar' ? 'ذكور' : 'Males'}
+                    </span>
                 </div>
             </div>
             <div className="flex justify-center gap-6 mt-4 text-xs">
                 <div className="flex items-center gap-2">
                     <div className="w-3 h-3 rounded-full bg-[var(--accent-primary)]"></div>
-                    <span>ذكور: {genderData.males}</span>
+                    <span>{language === 'ar' ? 'ذكور' : 'Males'}: {genderData.males}</span>
                 </div>
                 <div className="flex items-center gap-2">
                     <div className="w-3 h-3 rounded-full bg-[var(--accent-secondary)]"></div>
-                    <span>إناث: {genderData.females}</span>
+                    <span>{language === 'ar' ? 'إناث' : 'Females'}: {genderData.females}</span>
                 </div>
             </div>
         </div>
@@ -132,7 +154,7 @@ const MetricCard: React.FC<{ title: string; value: string; icon: React.ReactNode
 );
 
 
-const AdvancedStats: React.FC<AdvancedStatsProps> = ({ students, selectedDate }) => {
+const AdvancedStats: React.FC<AdvancedStatsProps> = ({ students, selectedDate, language }) => {
     const [isOpen, setIsOpen] = useState(false);
 
     const advancedMetrics = useMemo(() => {
@@ -150,30 +172,24 @@ const AdvancedStats: React.FC<AdvancedStatsProps> = ({ students, selectedDate })
                 className="w-full flex justify-between items-center p-4 bg-[var(--bg-glass)] rounded-xl border border-[var(--border-color)] backdrop-blur-lg mb-2"
             >
                 <h2 className="text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-slate-400 to-slate-500 dark:from-slate-300 dark:to-slate-400">
-                    تحليلات متقدمة
+                    {language === 'ar' ? 'تحليلات متقدمة' : 'Advanced Analytics'}
                 </h2>
-                <svg
-                    xmlns="http://www.w3.org/2000/svg"
+                <ChevronDown
                     className={`h-6 w-6 text-[var(--text-secondary)] transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`}
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                >
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                </svg>
+                />
             </button>
             <div className={`grid transition-all duration-500 ease-in-out ${isOpen ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'}`}>
                 <div className="overflow-hidden">
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 pt-4">
                         <div className="lg:col-span-2">
-                             <GradeDistributionChart students={students} />
+                             <GradeDistributionChart students={students} language={language} />
                         </div>
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-6">
-                            <GenderDonutChart students={students} />
+                            <GenderDonutChart students={students} language={language} />
                             <MetricCard
-                                title="حالة الحضور المسجلة"
+                                title={language === 'ar' ? 'نسبة تسجيل حضور الفصول اليوم' : 'Daily Attendance Marked Rate'}
                                 value={advancedMetrics.attendanceMarkedPercent}
-                                icon={<svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z" /><path fillRule="evenodd" d="M4 5a2 2 0 012-2h8a2 2 0 012 2v10a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h4a1 1 0 100-2H7zm0 4a1 1 0 100 2h4a1 1 0 100-2H7z" clipRule="evenodd" /></svg>}
+                                icon={<ClipboardList className="h-5 w-5" />}
                             />
                         </div>
                     </div>

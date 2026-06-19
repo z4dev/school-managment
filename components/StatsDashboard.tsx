@@ -1,10 +1,12 @@
 import React, { useMemo, useState, useEffect, useRef } from 'react';
 import { Student } from '../types';
 import SiblingsModal from './SiblingsModal';
+import { Users, CheckCircle2, XCircle, Baby } from 'lucide-react';
 
 interface StatsDashboardProps {
   students: Student[];
   selectedDate: string;
+  language: 'ar' | 'en';
 }
 
 interface StatCardProps {
@@ -90,17 +92,17 @@ const StatCard: React.FC<StatCardProps> = ({ icon, label, value, color, secondar
                 </div>
                 <div className="flex-grow">
                      <div className="flex items-baseline gap-2">
-                         <div className="text-4xl font-bold text-[var(--text-primary)]"><AnimatedNumber value={value} /></div>
-                         {secondaryValue && <div className="text-sm font-semibold text-[var(--text-secondary)]">{secondaryValue}</div>}
-                    </div>
-                    <div className="text-sm font-medium text-[var(--text-secondary)]">{label}</div>
+                          <div className="text-4xl font-bold text-[var(--text-primary)]"><AnimatedNumber value={value} /></div>
+                          {secondaryValue && <div className="text-sm font-semibold text-[var(--text-secondary)]">{secondaryValue}</div>}
+                     </div>
+                     <div className="text-sm font-medium text-[var(--text-secondary)]">{label}</div>
                 </div>
             </div>
         </div>
     );
 };
 
-const StatsDashboard: React.FC<StatsDashboardProps> = ({ students, selectedDate }) => {
+const StatsDashboard: React.FC<StatsDashboardProps> = ({ students, selectedDate, language }) => {
   const [isSiblingsModalOpen, setIsSiblingsModalOpen] = useState(false);
 
   const stats = useMemo(() => {
@@ -126,37 +128,38 @@ const StatsDashboard: React.FC<StatsDashboardProps> = ({ students, selectedDate 
     <>
       <div style={{ animationDelay: '200ms' }} className="animate-fade-in-down grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         <StatCard
-          label="إجمالي الطلاب"
+          label={language === 'ar' ? 'إجمالي الطلاب' : 'Total Students'}
           value={stats.totalStudents}
           color="primary"
-          icon={<svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" /></svg>}
+          icon={<Users className="h-6 w-6" />}
         />
         <StatCard
-          label="الطلاب الحاضرون"
+          label={language === 'ar' ? 'الطلاب الحاضرون' : 'Present Students'}
           value={stats.presentStudents}
           secondaryValue={getPercentage(stats.presentStudents, stats.totalStudents)}
           color="secondary"
-          icon={<svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>}
+          icon={<CheckCircle2 className="h-6 w-6" />}
         />
         <StatCard
-          label="الطلاب الغائبون"
+          label={language === 'ar' ? 'الطلاب الغائبون' : 'Absent Students'}
           value={stats.absentStudents}
           secondaryValue={getPercentage(stats.absentStudents, stats.totalStudents)}
           color="danger"
-          icon={<svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>}
+          icon={<XCircle className="h-6 w-6" />}
         />
         <StatCard
-          label="طلاب لديهم إخوة"
+          label={language === 'ar' ? 'طلاب لديهم إخوة' : 'Students with Siblings'}
           value={stats.studentsWithSiblings}
           color="info"
           onClick={() => setIsSiblingsModalOpen(true)}
-          icon={<svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" viewBox="0 0 20 20" fill="currentColor"><path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3zM6 8a2 2 0 11-4 0 2 2 0 014 0zM16 18v-3a5.972 5.972 0 00-.75-2.906A3.005 3.005 0 0119 15v3h-3zM4.75 12.094A5.973 5.973 0 004 15v3H1v-3a3 3 0 013.75-2.906z" /></svg>}
+          icon={<Baby className="h-6 w-6" />}
         />
       </div>
       <SiblingsModal 
         isOpen={isSiblingsModalOpen}
         onClose={() => setIsSiblingsModalOpen(false)}
         students={students}
+        language={language}
       />
     </>
   );

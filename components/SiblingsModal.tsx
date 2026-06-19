@@ -5,11 +5,32 @@ interface SiblingsModalProps {
   isOpen: boolean;
   onClose: () => void;
   students: Student[];
+  language: 'ar' | 'en';
 }
 
-const SiblingsModal: React.FC<SiblingsModalProps> = ({ isOpen, onClose, students }) => {
+const SiblingsModal: React.FC<SiblingsModalProps> = ({ isOpen, onClose, students, language }) => {
   const [isClosing, setIsClosing] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
+
+  const formatGrade = (grade: string) => {
+    const map: Record<string, string> = {
+      'الكل': language === 'ar' ? 'الكل' : 'All Grades',
+      'الاول': language === 'ar' ? 'الصف الأول' : 'Grade 1',
+      'الثاني': language === 'ar' ? 'الصف الثاني' : 'Grade 2',
+      'الثالث': language === 'ar' ? 'الصف الثالث' : 'Grade 3',
+      'الرابع': language === 'ar' ? 'الصف الرابع' : 'Grade 4',
+      'الخامس': language === 'ar' ? 'الصف الخامس' : 'Grade 5',
+      'السادس': language === 'ar' ? 'الصف السادس' : 'Grade 6',
+      'السابع': language === 'ar' ? 'الصف السابع' : 'Grade 7',
+      'الثامن': language === 'ar' ? 'الصف الثامن' : 'Grade 8',
+      'التاسع': language === 'ar' ? 'الصف التاسع' : 'Grade 9',
+      'العاشر': language === 'ar' ? 'الصف العاشر' : 'Grade 10',
+      'الحادي عشر': language === 'ar' ? 'الصف الحادي عشر' : 'Grade 11',
+      'الثاني عشر': language === 'ar' ? 'الصف الثاني عشر' : 'Grade 12',
+      'غير مصنف': language === 'ar' ? 'غير مصنف' : 'Unclassified',
+    };
+    return map[grade] || grade;
+  };
 
   useEffect(() => {
     if (!isOpen) {
@@ -34,7 +55,7 @@ const SiblingsModal: React.FC<SiblingsModalProps> = ({ isOpen, onClose, students
       return acc;
     }, {});
 
-    return Object.values(groupsByMobile)
+    return (Object.values(groupsByMobile) as Student[][])
       .filter(group => group.length > 1)
       .sort((a, b) => b.length - a.length); // Show larger families first
   }, [students]);
@@ -75,7 +96,9 @@ const SiblingsModal: React.FC<SiblingsModalProps> = ({ isOpen, onClose, students
       <div className={`bg-[var(--bg-glass)] border border-[var(--border-color)] rounded-xl shadow-2xl p-8 w-full max-w-3xl m-4 transform transition-all duration-300 flex flex-col ${isOpen && !isClosing ? 'scale-100 opacity-100' : 'scale-95 opacity-0'}`} style={{maxHeight: '85vh'}}>
         <div className="flex justify-between items-center mb-4">
             <h2 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-[var(--accent-info)] to-[var(--accent-primary)]">
-                مجموعات الإخوة ({filteredSiblingGroups.length} عائلة)
+                {language === 'ar' 
+                  ? `مجموعات الإخوة (${filteredSiblingGroups.length} عائلة)` 
+                  : `Sibling Groups (${filteredSiblingGroups.length} Families)`}
             </h2>
              <button onClick={handleClose} className="text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors">
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -87,7 +110,7 @@ const SiblingsModal: React.FC<SiblingsModalProps> = ({ isOpen, onClose, students
         <div className="mb-4 relative">
              <input
                 type="search"
-                placeholder="ابحث بالاسم أو رقم الاتصال..."
+                placeholder={language === 'ar' ? 'ابحث بالاسم أو رقم الاتصال...' : 'Search by name or contact number...'}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className={`${inputStyle} pl-10`}
@@ -103,16 +126,16 @@ const SiblingsModal: React.FC<SiblingsModalProps> = ({ isOpen, onClose, students
           {filteredSiblingGroups.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {filteredSiblingGroups.map((group, index) => (
-                <div key={index} className="bg-[rgba(10,15,26,0.5)] border border-[var(--border-color)] rounded-lg p-4">
+                <div key={index} className="bg-[var(--card-bg)] border border-[var(--border-color)] rounded-lg p-4">
                   <p className="text-sm text-[var(--text-secondary)] mb-2">
-                    عائلة برقم الاتصال: <span className="font-semibold text-[var(--text-primary)]">{group[0].mobile}</span>
+                    {language === 'ar' ? 'عائلة برقم الاتصال:' : 'Family Contact Number:'} <span className="font-semibold text-[var(--text-primary)]">{group[0].mobile}</span>
                   </p>
                   <ul className="space-y-2">
                     {group.map(student => (
                       <li key={student.id} className="flex items-center gap-3 text-sm">
                          <span className={`w-2 h-2 rounded-full ${student.gender === 'ذكر' ? 'bg-[var(--accent-primary)]' : 'bg-[var(--accent-secondary)]'}`}></span>
                          <span className="text-[var(--text-primary)] font-medium">{student.fullName}</span>
-                         <span className="text-xs text-[var(--text-secondary)]">({student.grade})</span>
+                         <span className="text-xs text-[var(--text-secondary)]">({formatGrade(student.grade)})</span>
                       </li>
                     ))}
                   </ul>
@@ -123,10 +146,14 @@ const SiblingsModal: React.FC<SiblingsModalProps> = ({ isOpen, onClose, students
             <div className="flex flex-col items-center justify-center text-center h-full p-8">
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-16 w-16 text-[var(--accent-info)]/30 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
                 <p className="text-lg font-semibold text-[var(--text-primary)]">
-                    {searchTerm ? 'لا توجد نتائج بحث مطابقة' : 'لم يتم العثور على مجموعات إخوة'}
+                    {searchTerm 
+                      ? (language === 'ar' ? 'لا توجد نتائج بحث مطابقة' : 'No matching search results') 
+                      : (language === 'ar' ? 'لم يتم العثور على مجموعات إخوة' : 'No sibling groups found')}
                 </p>
                 <p className="text-[var(--text-secondary)] mt-1">
-                    {searchTerm ? 'حاول استخدام كلمات بحث مختلفة.' : 'لا يوجد طلاب لديهم إخوة في القائمة الحالية.'}
+                    {searchTerm 
+                      ? (language === 'ar' ? 'حاول استخدام كلمات بحث مختلفة.' : 'Try using different search keywords.') 
+                      : (language === 'ar' ? 'لا يوجد طلاب لديهم إخوة في القائمة الحالية.' : 'No students have siblings in the current list.')}
                 </p>
             </div>
           )}
@@ -134,7 +161,7 @@ const SiblingsModal: React.FC<SiblingsModalProps> = ({ isOpen, onClose, students
 
         <div className="mt-8 flex justify-end">
             <button type="button" onClick={handleClose} className="px-6 py-2 rounded-lg text-[var(--text-primary)] bg-black/20 border border-[var(--border-color)] hover:border-[var(--text-secondary)] transition-colors duration-300">
-              إغلاق
+              {language === 'ar' ? 'إغلاق' : 'Close'}
             </button>
         </div>
       </div>

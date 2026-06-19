@@ -35,33 +35,53 @@
         --text-accent-secondary: #6EE7B7;
         --text-accent-danger: #FCA5A5;
         --text-accent-info: #C4B5FD;
+
+        /* Semantic Tokens */
+        --card-bg: rgba(26, 32, 44, 0.6);
+        --input-bg: rgba(0, 0, 0, 0.3);
+        --badge-bg: rgba(255, 255, 255, 0.08);
+        --hover-bg: rgba(255, 255, 255, 0.05);
+        --border-subtle: rgba(255, 255, 255, 0.05);
+        --tab-inactive-bg: rgba(0, 0, 0, 0.25);
+        --radial-glow-1: rgba(56, 189, 248, 0.1);
+        --radial-glow-2: rgba(52, 211, 153, 0.1);
       }
       
       html.light { /* Light Theme */
         --bg-primary: #F8FAFC;
         --bg-secondary: #FFFFFF;
-        --bg-glass: rgba(255, 255, 255, 0.8);
-        --text-primary: #1E293B;
-        --text-secondary: #64748B;
-        --accent-primary: #0EA5E9;   /* darker blue */
-        --accent-secondary: #10B981; /* darker green */
-        --accent-danger: #EF4444;    /* darker red */
-        --accent-info: #8B5CF6;      /* darker violet */
+        --bg-glass: rgba(255, 255, 255, 0.85);
+        --text-primary: #0F172A;     /* slate-900 (highly accessible contrast) */
+        --text-secondary: #475569;   /* slate-600 */
+        --accent-primary: #0284C7;   /* sky-600 */
+        --accent-secondary: #059669; /* emerald-600 */
+        --accent-danger: #DC2626;    /* red-600 */
+        --accent-info: #7C3AED;      /* violet-600 */
         --border-color: #E2E8F0;
-        --glow-primary: 0 0 8px var(--accent-primary);
-        --glow-secondary: 0 0 8px var(--accent-secondary);
-        --glow-danger: 0 0 8px var(--accent-danger);
-        --glow-info: 0 0 8px var(--accent-info);
+        --glow-primary: 0 4px 12px rgba(2, 132, 199, 0.15);
+        --glow-secondary: 0 4px 12px rgba(5, 150, 105, 0.15);
+        --glow-danger: 0 4px 12px rgba(220, 38, 38, 0.15);
+        --glow-info: 0 4px 12px rgba(124, 58, 237, 0.15);
 
-        --soft-bg-primary: rgba(14, 165, 233, 0.1);
-        --soft-bg-secondary: rgba(16, 185, 129, 0.1);
-        --soft-bg-danger: rgba(239, 68, 68, 0.1);
-        --soft-bg-info: rgba(139, 92, 246, 0.1);
+        --soft-bg-primary: rgba(2, 132, 199, 0.08);
+        --soft-bg-secondary: rgba(5, 150, 105, 0.08);
+        --soft-bg-danger: rgba(220, 38, 38, 0.08);
+        --soft-bg-info: rgba(124, 58, 237, 0.08);
         
-        --text-accent-primary: #0EA5E9;
-        --text-accent-secondary: #10B981;
-        --text-accent-danger: #EF4444;
-        --text-accent-info: #8B5CF6;
+        --text-accent-primary: #0284C7;
+        --text-accent-secondary: #059669;
+        --text-accent-danger: #DC2626;
+        --text-accent-info: #7C3AED;
+
+        /* Semantic Tokens */
+        --card-bg: rgba(255, 255, 255, 0.95);
+        --input-bg: #F1F5F9;
+        --badge-bg: #E2E8F0;
+        --hover-bg: #F1F5F9;
+        --border-subtle: #E2E8F0;
+        --tab-inactive-bg: #E2E8F0;
+        --radial-glow-1: rgba(2, 132, 199, 0.04);
+        --radial-glow-2: rgba(5, 150, 105, 0.04);
       }
 
       body {
@@ -70,8 +90,8 @@
         color: var(--text-primary);
         transition: background-color 0.3s ease, color 0.3s ease;
         background-image: 
-          radial-gradient(circle at 15% 50%, rgba(56, 189, 248, 0.1), transparent 30%),
-          radial-gradient(circle at 85% 30%, rgba(52, 211, 153, 0.1), transparent 30%);
+          radial-gradient(circle at 15% 50%, var(--radial-glow-1), transparent 30%),
+          radial-gradient(circle at 85% 30%, var(--radial-glow-2), transparent 30%);
       }
 
       @keyframes fade-in-down {
@@ -137,15 +157,7 @@
         background-position: center;
       }
     </style>
-  <script type="importmap">
-{
-  "imports": {
-    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
-    "react/": "https://aistudiocdn.com/react@^19.2.0/",
-    "react": "https://aistudiocdn.com/react@^19.2.0"
-  }
-}
-</script>
+
 </head>
   <body class="bg-[var(--bg-primary)]">
     <div id="root"></div>
