@@ -1,28 +1,21 @@
 {
-  "name": "student-records-manager",
+  "name": "school-management-monorepo",
   "private": true,
-  "version": "0.0.0",
-  "type": "module",
+  "version": "1.0.0",
+  "workspaces": [
+    "frontend",
+    "backend"
+  ],
   "scripts": {
-    "dev:frontend": "vite",
-    "dev:backend": "npm --prefix server run dev",
+    "dev:frontend": "npm --workspace=school-management-frontend run dev",
+    "dev:backend": "npm --workspace=school-management-backend run dev",
     "dev": "concurrently \"npm run dev:frontend\" \"npm run dev:backend\"",
-    "build:frontend": "vite build",
-    "build:backend": "npm --prefix server run build",
+    "build:frontend": "npm --workspace=school-management-frontend run build",
+    "build:backend": "npm --workspace=school-management-backend run build",
     "build": "npm run build:frontend && npm run build:backend",
-    "preview": "vite preview",
-    "install:all": "npm install && npm --prefix server install"
-  },
-  "dependencies": {
-    "lucide-react": "^1.21.0",
-    "react": "^19.2.0",
-    "react-dom": "^19.2.0"
+    "install:all": "npm install"
   },
   "devDependencies": {
-    "@types/node": "^22.14.0",
-    "@vitejs/plugin-react": "^5.0.0",
-    "concurrently": "^10.0.3",
-    "typescript": "~5.8.2",
-    "vite": "^6.2.0"
+    "concurrently": "^10.0.3"
   }
 }

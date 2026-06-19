@@ -126,8 +126,12 @@ export function seedDb() {
 
   // 2. Load and Parse CSV seed data
   try {
-    const rootConstantsPath = path.resolve(__dirname, '../../constants.ts');
-    const fileContent = fs.readFileSync(rootConstantsPath, 'utf-8');
+    const constantsPath = process.env.CONSTANTS_PATH || (
+      fs.existsSync(path.resolve(__dirname, '../../frontend/constants.ts'))
+      ? path.resolve(__dirname, '../../frontend/constants.ts')
+      : path.resolve(__dirname, '../../constants.ts')
+    );
+    const fileContent = fs.readFileSync(constantsPath, 'utf-8');
     const csvMatch = fileContent.match(/export const INITIAL_CSV_DATA = `([\s\S]*?)`;/);
     const csvData = csvMatch ? csvMatch[1] : '';
     

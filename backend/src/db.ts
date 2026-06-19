@@ -1,12 +1,20 @@
 import { DatabaseSync } from 'node:sqlite';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import fs from 'node:fs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 // Database path
-const dbPath = path.resolve(__dirname, '../../school.db');
+const dbPath = process.env.DATABASE_PATH || path.resolve(__dirname, '../../school.db');
+
+// Ensure directory exists
+const dbDir = path.dirname(dbPath);
+if (!fs.existsSync(dbDir)) {
+  fs.mkdirSync(dbDir, { recursive: true });
+}
+
 export const db = new DatabaseSync(dbPath);
 
 export function initDb() {

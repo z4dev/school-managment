@@ -1,0 +1,28 @@
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    container_name: school-backend
+    ports:
+      - "5050:5050"
+    volumes:
+      - backend-data:/usr/src/app/data
+    environment:
+      - PORT=5050
+      - NODE_ENV=production
+    restart: always
+
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+    container_name: school-frontend
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+    restart: always
+
+volumes:
+  backend-data:
